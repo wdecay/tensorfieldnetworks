@@ -1,4 +1,4 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import numpy as np
 import scipy.linalg
 
@@ -29,7 +29,7 @@ def norm_with_epsilon(input_tensor, axis=None, keep_dims=False):
     Returns:
         tf.Tensor normed over axis
     """
-    return tf.sqrt(tf.maximum(tf.reduce_sum(tf.square(input_tensor), axis=axis, keep_dims=keep_dims), EPSILON))
+    return tf.sqrt(tf.maximum(tf.reduce_sum(tf.square(input_tensor), axis=axis, keepdims=keep_dims), EPSILON))
 
 
 def ssp(x):

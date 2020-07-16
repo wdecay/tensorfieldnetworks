@@ -1,8 +1,8 @@
 from math import sqrt
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import numpy as np
 from tensorfieldnetworks import utils
-from utils import FLOAT_TYPE, EPSILON
+from tensorfieldnetworks.utils import FLOAT_TYPE, EPSILON
 
 # Layers for 3D rotation-equivariant network.
 
@@ -10,7 +10,8 @@ from utils import FLOAT_TYPE, EPSILON
 def R(inputs, nonlin=tf.nn.relu, hidden_dim=None, output_dim=1, weights_initializer=None, biases_initializer=None):
     with tf.variable_scope(None, "radial_function", values=[inputs]):
         if weights_initializer is None:
-            weights_initializer = tf.contrib.layers.xavier_initializer()
+            weights_initializer = tf.compat.v1.keras.initializers.glorot_uniform()
+            # tf.contrib.layers.xavier_initializer()
         if biases_initializer is None:
             biases_initializer = tf.constant_initializer(0.)
         input_dim = inputs.get_shape()[-1]
@@ -197,7 +198,7 @@ def self_interaction_layer_without_biases(inputs, output_dim, weights_initialize
     # input has shape [N, C, 2L+1]
     # input_dim is number of channels
     if weights_initializer is None:
-        weights_initializer = tf.orthogonal_initializer()
+        weights_initializer = tf.initializers.orthogonal()
     if biases_initializer is None:
         biases_initializer = tf.constant_initializer(0.)
 
