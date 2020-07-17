@@ -1,5 +1,5 @@
 from math import sqrt
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import numpy as np
 from tensorfieldnetworks import utils
 from tensorfieldnetworks.utils import FLOAT_TYPE, EPSILON
