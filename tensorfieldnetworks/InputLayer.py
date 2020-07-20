@@ -41,7 +41,7 @@ class InputLayer(tf.keras.layers.Layer):
         # [1, N, 3]
         rj = tf.expand_dims(geometry, axis=0)
         # [N, N, 3]
-        rij = ri - rj
+        rij = tf.subtract(ri, rj) #ri - rj
         return rij
 
 

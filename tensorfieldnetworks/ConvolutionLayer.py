@@ -29,7 +29,6 @@ class Filter(tf.keras.layers.Layer):
     self.b1 = self.add_weight(shape=[hidden_dim], dtype=FLOAT_TYPE,
                               initializer=biases_initializer)
 
-
   def call(self, input):
     layer_input, rbf, rij = input
     if self.li == 0:
@@ -140,16 +139,18 @@ class ConvolutionLayer(tf.keras.layers.Layer):
         for i, shape in enumerate(input_shapes[0][key]):
           self.filters.append(Filter(0))
           n += 1
-          if key is 1:
+          if key == 1:
             self.filters.append(Filter(1, 0))
             n += 1
-          if key is 0 or key is 1:
+          if key == 0 or key == 1:
             self.filters.append(Filter(1, 1))
             n += 1
 
   @tf.function
   def call(self, input):
+    print(input)
     input_tensor_list, rbf, unit_vectors = input
+    print('test')
     n = 0
     output_tensor_list = {0: [], 1: []}
     for key in input_tensor_list:
@@ -160,16 +161,16 @@ class ConvolutionLayer(tf.keras.layers.Layer):
           tensor_out = self.filters[n]([tensor, rbf, unit_vectors])
           n += 1
           m = 0 if tensor_out.get_shape().as_list()[-1] == 1 else 1
-          tensor_out = tf.identity(tensor_out, name="F0_to_L_out_tensor")
+          #tensor_out = tf.identity(tensor_out, name="F0_to_L_out_tensor")
           output_tensor_list[m].append(tensor_out)
-        if key is 1:
+        if key == 1:
           # L x 1 -> 0
           tensor_out = self.filters[n]([tensor, rbf, unit_vectors])
           n += 1
           m = 0 if tensor_out.get_shape().as_list()[-1] == 1 else 1
-          tensor_out = tf.identity(tensor_out, name="F1_to_0_out_tensor")
+          #tensor_out = tf.identity(tensor_out, name="F1_to_0_out_tensor")
           output_tensor_list[m].append(tensor_out)
-        if key is 0 or key is 1:
+        if key == 0 or key == 1:
           # L x 1 -> 1
           tensor_out = self.filters[n]([tensor, rbf, unit_vectors])
           n += 1

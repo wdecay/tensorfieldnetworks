@@ -17,7 +17,7 @@ class SelfInteractionSimple(tf.keras.layers.Layer):
         trainable=True)
 
   @tf.function
-  def call(self, inputs):
+  def call(self, inputs, training=False):
         return tf.transpose(tf.einsum('afi,gf->aig', inputs, self.w), perm=[0, 2, 1])
 
 
@@ -36,7 +36,7 @@ class SelfInteractionLayer(tf.keras.layers.Layer):
 
 
   @tf.function
-  def call(self, input_tensor_list):
+  def call(self, input_tensor_list, training=False):
     output_tensor_list = {0: [], 1: []}
     n = 0
     for key in input_tensor_list:

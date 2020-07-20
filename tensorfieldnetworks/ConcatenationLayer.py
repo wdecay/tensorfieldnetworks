@@ -10,4 +10,3 @@ class ConcatenationLayer(tf.keras.layers.Layer):
         for key in input_tensor_list:
             output_tensor_list[key].append(tf.concat(input_tensor_list[key], axis=-2))
         return output_tensor_list
-

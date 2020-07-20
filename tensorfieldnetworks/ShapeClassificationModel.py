@@ -21,8 +21,9 @@ class ShapeClassificationModel(tf.keras.Model):
             self.model_layers.append(NonlinearityLayer())
 
         self.output_layer = OutputLayer(num_classes)
-
-    def call(self, input):
+    
+    #@tf.function
+    def call(self, input, training=False):
         x  = self.embed_layer(tf.ones(shape=(4, 1, 1)))
         input_tensor_list = {0: [x]}
         rbf, rij = self.input_layer(input)
