@@ -5,6 +5,7 @@ import numpy as np
 class InputLayer(tf.keras.layers.Layer):
     def __init__(self, *args, **kwargs):
         # radial basis functions
+        print("const")
         rbf_low = 0.0
         rbf_high = 3.5
         rbf_count = 4
@@ -13,10 +14,11 @@ class InputLayer(tf.keras.layers.Layer):
         super().__init__(*args, **kwargs)
 
     def build(self, input_shape):
-        pass
+        print("build")
 
     @tf.function
-    def call(self, input):
+    def call(self, input, training=False):
+        print("call")
         # rij : [N, N, 3]
         rij = self.difference_matrix(input)
         # dij : [N, N]
@@ -36,16 +38,19 @@ class InputLayer(tf.keras.layers.Layer):
         Returns:
             Relative vector matrix with shape [N, N, 3]
         """
+        print("call diff")
+
         # [N, 1, 3]
         ri = tf.expand_dims(geometry, axis=1)
         # [1, N, 3]
         rj = tf.expand_dims(geometry, axis=0)
         # [N, N, 3]
-        rij = tf.subtract(ri, rj) #ri - rj
+        rij = ri - rj
         return rij
 
 
     def distance_matrix(self, geometry):
+        print("call dist")
         """
         Get relative distance matrix for array of shape [N, 3].
 

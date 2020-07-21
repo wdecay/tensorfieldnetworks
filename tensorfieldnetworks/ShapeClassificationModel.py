@@ -9,7 +9,7 @@ from tensorfieldnetworks.OutputLayer import OutputLayer
 
 class ShapeClassificationModel(tf.keras.Model):
     def __init__(self, num_classes, layer_dims = [1, 4, 4, 4]):
-        super().__init__()
+        super(ShapeClassificationModel, self).__init__()
         self.embed_layer = SelfInteractionSimple(layer_dims[0])
         self.input_layer = InputLayer()
         
@@ -26,12 +26,12 @@ class ShapeClassificationModel(tf.keras.Model):
     def call(self, input, training=False):
         x  = self.embed_layer(tf.ones(shape=(4, 1, 1)))
         input_tensor_list = {0: [x]}
-        rbf, rij = self.input_layer(input)
-
+        rbf, rij = self.input_layer(input, training)
+        #print("test")
         for layer in self.model_layers:
             if isinstance(layer, ConvolutionLayer): 
                 input_tensor_list = layer([input_tensor_list, rbf, rij])
             else:
                 input_tensor_list = layer(input_tensor_list)
-        
         return self.output_layer(input_tensor_list)
+        #return tf.one_hot(1, 8)
