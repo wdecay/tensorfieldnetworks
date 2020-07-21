@@ -19,21 +19,6 @@ def norm_with_epsilon(input_tensor, axis=None, keep_dims=False):
     return tf.sqrt(tf.maximum(tf.reduce_sum(tf.square(input_tensor), axis=axis, keepdims=keep_dims), EPSILON))
 
 
-def ssp(x):
-    """
-    Shifted soft plus nonlinearity.
-
-    Args:
-        x: tf.Tensor
-
-    Returns:
-        tf.Tensor of same shape as x 
-   """
-    return tf.log(0.5 * tf.exp(x) + 0.5)
-
-
-
-
 def random_rotation_matrix(numpy_random_state):
     """
     Generates a random 3D rotation matrix from axis and angle.

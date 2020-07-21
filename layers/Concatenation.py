@@ -1,8 +1,8 @@
 import tensorflow as tf
 
-class ConcatenationLayer(tf.keras.layers.Layer):
+class Concatenation(tf.keras.layers.Layer):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(Concatenation, self).__init__(**kwargs)
 
     @tf.function
     def call(self, input_tensor_list):

@@ -7,24 +7,33 @@ class SelfInteractionSimple(tf.keras.layers.Layer):
 
   def build(self, input_shape):
        #input_dim = inputs.get_shape().as_list()[-2]
-      weights_initializer = tf.initializers.Orthogonal()
-      #biases_initializer = tf.constant_initializer(0.)
-      self.w = self.add_weight(
-        shape=(self.output_dim, input_shape[-2]),
-        dtype=tf.float32,
-        initializer=weights_initializer,
-        #regularizer=tf.keras.regularizers.l2(0.02),
-        trainable=True)
-
+    weights_initializer = tf.initializers.Orthogonal()
+    self.batch_mode = len(input_shape) == 4
+    #biases_initializer = tf.constant_initializer(0.)
+    self.w = self.add_weight(
+      shape=(self.output_dim, input_shape[-2]),
+      dtype=tf.float32,
+      initializer=weights_initializer,
+      #regularizer=tf.keras.regularizers.l2(0.02),
+      trainable=True)
+    
   @tf.function
   def call(self, inputs, training=False):
-        return tf.transpose(tf.einsum('afi,gf->aig', inputs, self.w), perm=[0, 2, 1])
+    def process_row(row):
+      return tf.transpose(
+        tf.einsum('afi,gf->aig', row, self.w), perm=[0, 2, 1])
+    if self.batch_mode:
+      return tf.map_fn(process_row, inputs)
+    else:
+      return process_row(inputs)
+    #return tf.transpose(
+    #  tf.einsum('afi,gf->aig', inputs, self.w), perm=[0, 2, 1])
 
 
-class SelfInteractionLayer(tf.keras.layers.Layer):
+class SelfInteraction(tf.keras.layers.Layer):
   def __init__(self, output_dim, **kwargs):
     self.output_dim = output_dim
-    super().__init__(**kwargs)
+    super(SelfInteraction, self).__init__(**kwargs)
 
   def build(self, input_shape):
     n = 0

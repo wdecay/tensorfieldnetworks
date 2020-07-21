@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
-import tensorfieldnetworks.utils as utils
-from tensorfieldnetworks.utils import FLOAT_TYPE, EPSILON
+import layers.utils as utils
+from layers.utils import FLOAT_TYPE, EPSILON
 
 class Filter(tf.keras.layers.Layer):
   def __init__(self,  li, lf = None, **kwargs):
@@ -18,6 +18,7 @@ class Filter(tf.keras.layers.Layer):
     self.input_dim = layer_input_shape[-1]
     self.output_dim = layer_input_shape[-2]
 
+    self.batch_mode = len(layer_input_shape) == 4
     hidden_dim = rbf_shape[-1]
     
     self.w1 = self.add_weight(shape=[hidden_dim, rbf_shape[-1]], dtype=FLOAT_TYPE,
@@ -29,16 +30,23 @@ class Filter(tf.keras.layers.Layer):
     self.b1 = self.add_weight(shape=[hidden_dim], dtype=FLOAT_TYPE,
                               initializer=biases_initializer)
 
-  def call(self, input):
-    layer_input, rbf, rij = input
-    if self.li == 0:
-      return self.filter_0(layer_input, rbf)
-    elif self.li == 1 and self.lf == 0:
-      return self.filter_1_output_0(layer_input, rbf, rij)
-    elif self.li == 1 and self.lf == 1:
-      return self.filter_1_output_1(layer_input, rbf, rij)
+  def call(self, inputs):
+    def process_row(row):
+      layer_input, rbf, rij = row
+      if self.li == 0:
+        return self.filter_0(layer_input, rbf)
+      elif self.li == 1 and self.lf == 0:
+        return self.filter_1_output_0(layer_input, rbf, rij)
+      elif self.li == 1 and self.lf == 1:
+        return self.filter_1_output_1(layer_input, rbf, rij)
+      else:
+        raise NotImplementedError("Other Ls not implemented")
+
+    #layer_input, rbf, rij = inputs
+    if self.batch_mode:
+      return tf.map_fn(process_row, inputs)
     else:
-      raise NotImplementedError("Other Ls not implemented")
+      return process_row(inputs)
 
   def R(self, inputs):
     hidden_layer = self.nonlin(self.b1 + tf.tensordot(inputs, self.w1, [[2], [1]]))
@@ -128,9 +136,9 @@ class Filter(tf.keras.layers.Layer):
     eijk_[0, 2, 1] = eijk_[2, 1, 0] = eijk_[1, 0, 2] = -1.
     return tf.constant(eijk_, dtype=FLOAT_TYPE)
 
-class ConvolutionLayer(tf.keras.layers.Layer):
+class Convolution(tf.keras.layers.Layer):
   def __init__(self,  **kwargs):
-    super().__init__(**kwargs)
+    super(Convolution, self).__init__(**kwargs)
 
   def build(self, input_shapes):
     n = 0
@@ -148,9 +156,7 @@ class ConvolutionLayer(tf.keras.layers.Layer):
 
   @tf.function
   def call(self, input):
-    print(input)
     input_tensor_list, rbf, unit_vectors = input
-    print('test')
     n = 0
     output_tensor_list = {0: [], 1: []}
     for key in input_tensor_list:

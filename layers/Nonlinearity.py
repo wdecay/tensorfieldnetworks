@@ -1,5 +1,5 @@
 import tensorflow as tf
-import tensorfieldnetworks.utils as utils
+import layers.utils as utils
 
 class RotationEquivariantNonlinearity(tf.keras.layers.Layer):
     def __init__(self, nonlin = tf.nn.elu, **kwargs):
@@ -28,11 +28,11 @@ class RotationEquivariantNonlinearity(tf.keras.layers.Layer):
             # Expand dims for representation index.
             return tf.multiply(input, tf.expand_dims(factor, axis=-1))
 
-class NonlinearityLayer(tf.keras.layers.Layer):
+class Nonlinearity(tf.keras.layers.Layer):
     def __init__(self, **kwargs):
         self.nonlin = tf.nn.elu
         self.biases_initializer = None
-        super().__init__(**kwargs)
+        super(Nonlinearity, self).__init__(**kwargs)
 
     def build(self, input_shapes):
         n = 0

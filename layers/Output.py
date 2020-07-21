@@ -1,9 +1,9 @@
 import tensorflow as tf
 
-class OutputLayer(tf.keras.layers.Layer):
+class Output(tf.keras.layers.Layer):
     def __init__(self, num_classes, **kwargs):
         self.num_classes = num_classes
-        super().__init__(**kwargs)
+        super(Output, self).__init__(**kwargs)
 
     def build(self, input_shape):
         tfn_output_shape = input_shape[0][0].as_list()
@@ -20,4 +20,7 @@ class OutputLayer(tf.keras.layers.Layer):
         tfn_output = tf.reduce_mean(tf.squeeze(tfn_scalars), axis=0)
         # output : [num_classes]
         output = tf.einsum('xy,x->y', self.fully_connected_layer, tfn_output) + self.output_biases
-        return output
+        # NOTE: this use of softmax is discouraged here,
+        # but I was not able to figure out how to fit the model
+        # with tf.nn.softmax_cross_entropy_with_logits
+        return tf.nn.softmax(output)

@@ -1,30 +1,39 @@
 import tensorflow as tf
-import tensorfieldnetworks.utils as utils
+import layers.utils as utils
 import numpy as np
 
-class InputLayer(tf.keras.layers.Layer):
+class Input(tf.keras.layers.Layer):
     def __init__(self, *args, **kwargs):
         # radial basis functions
         rbf_low = 0.0
         rbf_high = 3.5
         rbf_count = 4
         self.rbf_spacing = (rbf_high - rbf_low) / rbf_count
-        self.centers = tf.cast(np.linspace(rbf_low, rbf_high, rbf_count), tf.float32)
-        super().__init__(*args, **kwargs)
+        self.centers = tf.cast(np.linspace(rbf_low, rbf_high, rbf_count), tf.float32)            
+        super(Input, self).__init__(*args, **kwargs)
 
     def build(self, input_shape):
-        pass
+        self.batch_mode = len(input_shape) == 3
 
     @tf.function
-    def call(self, input):
-        # rij : [N, N, 3]
-        rij = self.difference_matrix(input)
-        # dij : [N, N]
-        dij = self.distance_matrix(input)
-        # rbf : [N, N, rbf_count]
-        gamma = 1. / self.rbf_spacing
-        rbf = tf.exp(-gamma * tf.square(tf.expand_dims(dij, axis=-1) - self.centers))
-        return rbf, rij
+    def call(self, inputs):
+        def get_rij(row):
+            # rij : [N, N, 3]
+            return self.difference_matrix(row)
+
+        def get_rbf(row):    
+            # dij : [N, N]
+            dij = self.distance_matrix(row)
+            # rbf : [N, N, rbf_count]
+            gamma = 1. / self.rbf_spacing
+            rbf = tf.exp(-gamma * tf.square(tf.expand_dims(dij, axis=-1) - self.centers))
+            return rbf
+
+        if self.batch_mode:
+            return tf.map_fn(get_rbf, inputs), tf.map_fn(get_rij, inputs)
+        else:
+            return get_rbf(inputs), get_rij(inputs)
+
 
     def difference_matrix(self, geometry):
         """
