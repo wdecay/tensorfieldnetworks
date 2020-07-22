@@ -6,13 +6,14 @@ class Output(tf.keras.layers.Layer):
         super(Output, self).__init__(**kwargs)
 
     def build(self, input_shape):
-        print(input_shape)
         tfn_output_shape = input_shape[0][0].as_list()
 
-        self.fully_connected_layer = self.add_weight( 
+        self.fully_connected_layer = self.add_weight(
+            name = "fcl",
             shape = [tfn_output_shape[-2], self.num_classes], 
             dtype=tf.float32)
         self.output_biases = self.add_weight(
+            name = "biases",
             shape = [self.num_classes], dtype=tf.float32)
 
     @tf.function

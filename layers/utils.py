@@ -5,7 +5,6 @@ import scipy.linalg
 FLOAT_TYPE = tf.float32
 EPSILON = 1e-8
 
-
 def norm_with_epsilon(input_tensor, axis=None, keep_dims=False):
     """
     Regularized norm
@@ -17,25 +16,3 @@ def norm_with_epsilon(input_tensor, axis=None, keep_dims=False):
         tf.Tensor normed over axis
     """
     return tf.sqrt(tf.maximum(tf.reduce_sum(tf.square(input_tensor), axis=axis, keepdims=keep_dims), EPSILON))
-
-
-def random_rotation_matrix(numpy_random_state):
-    """
-    Generates a random 3D rotation matrix from axis and angle.
-
-    Args:
-        numpy_random_state: numpy random state object
-
-    Returns:
-        Random rotation matrix.
-    """
-    rng = numpy_random_state
-    axis = rng.randn(3)
-    axis /= np.linalg.norm(axis) + EPSILON
-    theta = 2 * np.pi * rng.uniform(0.0, 1.0)
-    return rotation_matrix(axis, theta)
-
-
-def rotation_matrix(axis, theta):
-    return scipy.linalg.expm(np.cross(np.eye(3), axis * theta))
-

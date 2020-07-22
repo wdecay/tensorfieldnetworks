@@ -12,7 +12,8 @@ class RotationEquivariantNonlinearity(tf.keras.layers.Layer):
         biases_initializer = None
 
         if self.representation_index != 1:
-            self.biases = self.add_weight(
+            self.bias = self.add_weight(
+                name="bias",
                 shape=[channels],
                 dtype=tf.float32,
                 initializer=biases_initializer)
@@ -22,7 +23,7 @@ class RotationEquivariantNonlinearity(tf.keras.layers.Layer):
             return self.nonlin(input)
         else:
             norm = utils.norm_with_epsilon(input, axis=-1)
-            nonlin_out = self.nonlin(tf.nn.bias_add(norm, self.biases))
+            nonlin_out = self.nonlin(tf.nn.bias_add(norm, self.bias))
             factor = tf.divide(nonlin_out, norm)
             # Expand dims for representation index.
             return tf.multiply(input, tf.expand_dims(factor, axis=-1))

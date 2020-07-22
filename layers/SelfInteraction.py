@@ -9,6 +9,7 @@ class SelfInteractionSimple(tf.keras.layers.Layer):
     weights_initializer = tf.initializers.Orthogonal()
     self.batch_mode = len(input_shape) == 4
     self.w = self.add_weight(
+      name="w",
       shape=(self.output_dim, input_shape[-2]),
       dtype=tf.float32,
       initializer=weights_initializer)

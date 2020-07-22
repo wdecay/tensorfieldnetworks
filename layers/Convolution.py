@@ -22,13 +22,13 @@ class Filter(tf.keras.layers.Layer):
     hidden_dim = rbf_shape[-1]
     
     self.w1 = self.add_weight(shape=[hidden_dim, rbf_shape[-1]], dtype=FLOAT_TYPE,
-                              initializer=weights_initializer)
+                              initializer=weights_initializer, name="w1")
     self.w2 = self.add_weight(shape=[self.output_dim, hidden_dim], dtype=FLOAT_TYPE,
-                              initializer=weights_initializer)
-    self.b2 = self.add_weight(shape=[self.output_dim], dtype=FLOAT_TYPE,
-                              initializer=biases_initializer)
+                              initializer=weights_initializer, name="w2")
     self.b1 = self.add_weight(shape=[hidden_dim], dtype=FLOAT_TYPE,
-                              initializer=biases_initializer)
+                              initializer=biases_initializer, name="b1")
+    self.b2 = self.add_weight(shape=[self.output_dim], dtype=FLOAT_TYPE,
+                              initializer=biases_initializer, name="b2")
 
   def call(self, inputs):
     def process_row(row):
