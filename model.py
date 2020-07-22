@@ -27,7 +27,7 @@ def compose_layers(num_classes, layer_dims, shape_input):
 
 
 def build_model(num_classes,
-                layer_dims = [1, 4, 4, 4],                
+                layer_dims = [1, 4, 4, 4],
                 shape_input = tf.keras.Input(shape=(4, 3), dtype=tf.float32)):
 
     output = compose_layers(num_classes, layer_dims, shape_input)
@@ -43,6 +43,14 @@ def build_model(num_classes,
     return model
 
 
-## debug
-#test_ds = train_dataset.map(lambda x, y: x).batch(8).take(1).as_numpy_iterator().next()
-#shape_input = test_ds
+# test with eager execution
+if __name__ == "__main__":
+    from dataset import get_dataset
+    dataset, num_classes = get_dataset()
+    test_data = dataset.map(lambda x, y: x).batch(1).take(1).as_numpy_iterator().next()
+    print("Input:")
+    print(test_data)
+    
+    result = compose_layers(num_classes, [1, 4, 4, 4], test_data)
+    print("Output:")
+    print(result)

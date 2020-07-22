@@ -6,17 +6,16 @@ from model import build_model
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
-train_dataset, num_classes = get_dataset()
+dataset, num_classes = get_dataset()
 
 model = build_model(num_classes)
 model.load_weights('./saved_weights/weights')
 
 rng = np.random.RandomState()
 
-augmented_dataset = train_dataset.concatenate(
-    train_dataset
-    .repeat(20)
+test_dataset = dataset.concatenate(
+    dataset.repeat(500)
     .map(get_rotation_augmentor(rng), num_parallel_calls=AUTOTUNE)
     .map(get_translation_augmentor(rng), num_parallel_calls=AUTOTUNE))
 
-model.evaluate(augmented_dataset.batch(8), verbose=2)
+model.evaluate(test_dataset.batch(8))
