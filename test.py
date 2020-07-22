@@ -1,7 +1,6 @@
 import tensorflow as tf
 from dataset import get_dataset
 import layers
-from ShapeClassificationModel import ShapeClassificationModel
 
 train_dataset, num_classes = get_dataset()
 
@@ -46,6 +45,6 @@ def loss_fn(truth, pred):
         logits = pred))
 
 model.compile(optimizer=optimizer, loss = loss_fn, metrics=['accuracy'])
-model.fit(train_dataset.repeat(30).batch(8), epochs=4, shuffle=True)
+model.fit(train_dataset.repeat(30).batch(5), epochs=4, shuffle=True)
 
-model.save('model_weights.h5')
+model.save_weights('./model.tf')
