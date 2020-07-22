@@ -11,8 +11,7 @@ class SelfInteractionSimple(tf.keras.layers.Layer):
     self.w = self.add_weight(
       shape=(self.output_dim, input_shape[-2]),
       dtype=tf.float32,
-      initializer=weights_initializer,
-      trainable=True)
+      initializer=weights_initializer)
     
   @tf.function
   def call(self, inputs, training=False):

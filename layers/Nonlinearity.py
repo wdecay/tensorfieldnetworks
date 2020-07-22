@@ -15,8 +15,7 @@ class RotationEquivariantNonlinearity(tf.keras.layers.Layer):
             self.biases = self.add_weight(
                 shape=[channels],
                 dtype=tf.float32,
-                initializer=biases_initializer,
-                trainable=True)
+                initializer=biases_initializer)
     
     def call(self, input):
         if self.representation_index == 1:
