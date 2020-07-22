@@ -13,7 +13,6 @@ tetris = [[(0, 0, 0), (0, 0, 1), (1, 0, 0), (1, 1, 0)],  # chiral_shape_1
 def get_dataset():
     num_classes = len(tetris)
     x = np.array([np.array(points_, dtype='float32') for points_ in tetris])
-    y = np.array([[i] for i in range(num_classes)])
+    y = np.array([i for i in range(num_classes)])
     return tf.data.Dataset.from_tensor_slices((x, y)), len(tetris)
-
 

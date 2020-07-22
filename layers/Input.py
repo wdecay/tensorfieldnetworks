@@ -29,10 +29,13 @@ class Input(tf.keras.layers.Layer):
             rbf = tf.exp(-gamma * tf.square(tf.expand_dims(dij, axis=-1) - self.centers))
             return rbf
 
+        def get_ones(row):
+            return tf.ones(shape=(4, 1, 1))
+
         if self.batch_mode:
-            return tf.map_fn(get_rbf, inputs), tf.map_fn(get_rij, inputs)
+            return tf.map_fn(get_ones, inputs), tf.map_fn(get_rbf, inputs), tf.map_fn(get_rij, inputs)
         else:
-            return get_rbf(inputs), get_rij(inputs)
+            return get_ones(), get_rbf(inputs), get_rij(inputs)
 
 
     def difference_matrix(self, geometry):

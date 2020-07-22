@@ -5,10 +5,8 @@ from ShapeClassificationModel import ShapeClassificationModel
 
 train_dataset, num_classes = get_dataset()
 
-def make_model(layer_dims = [1, 4, 4, 4]):
-    shape_input = tf.keras.Input(shape=(4, 3), dtype=tf.float32, batch_size = 5)
-
-    shape_input = tf.convert_to_tensor(list(train_dataset.take(1).as_numpy_iterator())[0][0])
+def build_model(layer_dims = [1, 4, 4, 4],                
+                shape_input = tf.keras.Input(shape=(4, 3), dtype=tf.float32)):
 
     embed_layer = layers.SelfInteractionSimple(layer_dims[0])
     input_layer = layers.Input()
@@ -21,13 +19,9 @@ def make_model(layer_dims = [1, 4, 4, 4]):
         model_layers.append(layers.Nonlinearity())
     output_layer = layers.Output(num_classes)
 
-    #x  = embed_layer(tf.ones(shape=(5, 4, 1, 1)))
-    x  = embed_layer(tf.ones(shape=(4, 1, 1)))
-        
-    input_tensor_list = {0: [x]}
+    x, rbf, rij = input_layer(shape_input)
+    input_tensor_list = {0: [embed_layer(x)]}
     
-    rbf, rij = input_layer(shape_input)
-
     for layer in model_layers:
         if isinstance(layer, layers.Convolution):
             input_tensor_list = layer([input_tensor_list, rbf, rij])
@@ -38,17 +32,20 @@ def make_model(layer_dims = [1, 4, 4, 4]):
     return tf.keras.Model(inputs = shape_input, outputs = output)
 
 
-# model = make_model()
+test_ds = train_dataset.map(lambda x, y: x).batch(8).take(1).as_numpy_iterator().next()
+model = build_model(
+    #shape_input = test_ds
+)
+model.summary()
 
-# training
-model = ShapeClassificationModel(num_classes)
 optimizer = tf.keras.optimizers.Adam(learning_rate=1.e-3)
+@tf.function
+def loss_fn(truth, pred):
+    return tf.reduce_sum(tf.nn.sparse_softmax_cross_entropy_with_logits(
+        labels = tf.cast(tf.squeeze(truth), tf.int32),
+        logits = pred))
 
-shape_input1 = tf.keras.Input(shape=(4, 3), dtype=tf.float32)
+model.compile(optimizer=optimizer, loss = loss_fn, metrics=['accuracy'])
+model.fit(train_dataset.repeat(30).batch(8), epochs=4, shuffle=True)
 
-model.compile(optimizer=optimizer,
-              loss=tf.keras.losses.SparseCategoricalCrossentropy(), # softmax is applied in the outer
-                                                                    # layer (see comment there).
-              metrics=['accuracy'])
-model.fit(train_dataset.repeat(10), epochs=1)
-model.save_weights('model_weights.h5')
+model.save('model_weights.h5')

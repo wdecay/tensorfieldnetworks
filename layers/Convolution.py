@@ -34,19 +34,19 @@ class Filter(tf.keras.layers.Layer):
     def process_row(row):
       layer_input, rbf, rij = row
       if self.li == 0:
-        return self.filter_0(layer_input, rbf)
+        return  self.filter_0(layer_input, rbf), 0, 0
       elif self.li == 1 and self.lf == 0:
-        return self.filter_1_output_0(layer_input, rbf, rij)
+        return self.filter_1_output_0(layer_input, rbf, rij), 0, 0
       elif self.li == 1 and self.lf == 1:
-        return self.filter_1_output_1(layer_input, rbf, rij)
+        return self.filter_1_output_1(layer_input, rbf, rij), 0, 0
       else:
         raise NotImplementedError("Other Ls not implemented")
 
     #layer_input, rbf, rij = inputs
     if self.batch_mode:
-      return tf.map_fn(process_row, inputs)
+      return tf.map_fn(process_row, inputs)[0]
     else:
-      return process_row(inputs)
+      return process_row(inputs)[0]
 
   def R(self, inputs):
     hidden_layer = self.nonlin(self.b1 + tf.tensordot(inputs, self.w1, [[2], [1]]))
@@ -143,8 +143,8 @@ class Convolution(tf.keras.layers.Layer):
   def build(self, input_shapes):
     n = 0
     self.filters = []
-    for key in input_shapes[0]:
-        for i, shape in enumerate(input_shapes[0][key]):
+    for key in input_shapes[-3]:
+        for i, shape in enumerate(input_shapes[-3][key]):
           self.filters.append(Filter(0))
           n += 1
           if key == 1:
@@ -164,21 +164,21 @@ class Convolution(tf.keras.layers.Layer):
         #tensor = tf.identity(tensor, name="in_tensor")
         if True:
           # L x 0 -> L
-          tensor_out = self.filters[n]([tensor, rbf, unit_vectors])
+          tensor_out = self.filters[n]((tensor, rbf, unit_vectors))
           n += 1
           m = 0 if tensor_out.get_shape().as_list()[-1] == 1 else 1
           #tensor_out = tf.identity(tensor_out, name="F0_to_L_out_tensor")
           output_tensor_list[m].append(tensor_out)
         if key == 1:
           # L x 1 -> 0
-          tensor_out = self.filters[n]([tensor, rbf, unit_vectors])
+          tensor_out = self.filters[n]((tensor, rbf, unit_vectors))
           n += 1
           m = 0 if tensor_out.get_shape().as_list()[-1] == 1 else 1
           #tensor_out = tf.identity(tensor_out, name="F1_to_0_out_tensor")
           output_tensor_list[m].append(tensor_out)
         if key == 0 or key == 1:
           # L x 1 -> 1
-          tensor_out = self.filters[n]([tensor, rbf, unit_vectors])
+          tensor_out = self.filters[n]((tensor, rbf, unit_vectors))
           n += 1
           m = 0 if tensor_out.get_shape().as_list()[-1] == 1 else 1
           #tensor_out = tf.identity(tensor_out, name="F1_to_1_out_tensor")
